@@ -2,15 +2,17 @@ import PropTypes from 'prop-types';
 import { Loader2, Power } from 'lucide-react';
 
 const formatTime = (ts) => {
-  if (!ts) return '--';
-  let d;
-  if (!isNaN(Number(ts)) && String(ts).trim() !== '') {
-    const n = Number(ts);
-    d = new Date(n < 100000000000 ? n * 1000 : n);
-  } else {
-    d = new Date(ts);
+  if (!ts || ts === '00:00:00') return '--';
+  if (typeof ts === 'string' && ts.includes('-')) {
+    return ts;
   }
-  return Number.isNaN(d.getTime()) ? ts : new Intl.DateTimeFormat(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d);
+  // Fallback: Unix timestamp 
+  if (!isNaN(Number(ts)) && String(ts).trim() !== '') {
+    const n = Number(ts);  
+    const d = new Date(n < 100000000000 ? n * 1000 : n);
+    return Number.isNaN(d.getTime()) ? ts : d.toLocaleTimeString();
+  }
+  return ts;
 };
 
 const LiveDataPanel = ({ upperDis, lowerDis, deviceStatus, deviceLastSync, deviceName, onToggleDevice, isDeviceMeasuring, isTogglingDevice }) => {

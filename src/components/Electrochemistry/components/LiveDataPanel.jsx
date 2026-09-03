@@ -2,18 +2,20 @@ import PropTypes from 'prop-types';
 import { Loader2, Power } from 'lucide-react';
 
 const formatTime = (ts) => {
-  if (!ts) return '--';
-  let d;
+  if (!ts || ts === '00:00:00') return '--';
+  if (typeof ts === 'string' && ts.includes('-')) {
+    return ts;
+  }
+  // Fallback: Unix timestamp
   if (!isNaN(Number(ts)) && String(ts).trim() !== '') {
     const n = Number(ts);
-    d = new Date(n < 100000000000 ? n * 1000 : n);
-  } else {
-    d = new Date(ts);
+    const d = new Date(n < 100000000000 ? n * 1000 : n);
+    return Number.isNaN(d.getTime()) ? ts : d.toLocaleTimeString();
   }
-  return Number.isNaN(d.getTime()) ? ts : new Intl.DateTimeFormat(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d);
+  return ts;
 };
 
-const LiveDataPanel = ({ upperDis, lowerDis, deviceStatus, deviceLastSync, deviceName, onToggleDevice, isDeviceMeasuring, isTogglingDevice }) => {
+const LiveDataPanel = ({ activeTest, upperDis, lowerDis, deviceStatus, deviceLastSync, deviceName, onToggleDevice, isDeviceMeasuring, isTogglingDevice }) => {
   const statusColor = deviceStatus === 'CONNECTED' ? 'bg-emerald-500' : deviceStatus === 'ERROR' ? 'bg-red-500' : 'bg-amber-500';
   
   return (
@@ -27,7 +29,13 @@ const LiveDataPanel = ({ upperDis, lowerDis, deviceStatus, deviceLastSync, devic
       </div>
       
       <div className="flex flex-1 flex-col p-5 justify-between">
-        <div className="space-y-5">
+        <div className="space-y-4">
+          {activeTest && (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-industrial-400 mb-1">ACTIVE TEST</p>
+              <p className="text-xl font-bold tracking-tight text-white leading-none">{activeTest}</p>
+            </div>
+          )}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-industrial-400 mb-1">UPPER DIS</p>
             <p className="text-3xl font-black tabular-nums tracking-tight text-white leading-none">{upperDis || '--'}</p>
@@ -63,5 +71,5 @@ const LiveDataPanel = ({ upperDis, lowerDis, deviceStatus, deviceLastSync, devic
   );
 };
 
-LiveDataPanel.propTypes = { upperDis: PropTypes.string, lowerDis: PropTypes.string, deviceStatus: PropTypes.string, deviceLastSync: PropTypes.string, deviceName: PropTypes.string, onToggleDevice: PropTypes.func.isRequired, isDeviceMeasuring: PropTypes.bool.isRequired, isTogglingDevice: PropTypes.bool.isRequired };
+LiveDataPanel.propTypes = { activeTest: PropTypes.string, upperDis: PropTypes.string, lowerDis: PropTypes.string, deviceStatus: PropTypes.string, deviceLastSync: PropTypes.string, deviceName: PropTypes.string, onToggleDevice: PropTypes.func.isRequired, isDeviceMeasuring: PropTypes.bool.isRequired, isTogglingDevice: PropTypes.bool.isRequired };
 export default LiveDataPanel;

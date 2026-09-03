@@ -12,16 +12,38 @@ const AddSampleForm = ({ onSubmitSample }) => {
     setErrors((current) => ({ ...current, [field]: '' }));
   };
 
+  const handleSampleIdChange = (e) => {
+    // Allow only A-Z (uppercase), 0-9, dash, underscore — max 14 chars for ESP32 hardware compatibility
+    const val = e.target.value.toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
+    updateField('sampleId', val.substring(0, 14));
+  };
+
+  const handleUserIdChange = (e) => {
+    // Allow only A-Z (uppercase), 0-9, dash, underscore — max 15 chars
+    const val = e.target.value.toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
+    updateField('userId', val.substring(0, 15));
+  };
+
   const validate = () => {
     const nextErrors = {};
     const sampleId = values.sampleId.trim();
     if (!sampleId) {
       nextErrors.sampleId = 'Required.';
-    } else if (!/^[A-Za-z0-9]+$/.test(sampleId)) {
-      nextErrors.sampleId = 'Sample ID can contain only letters and numbers. Spaces and special characters are not allowed.';
+    } else if (!/^[A-Z0-9\-_]+$/.test(sampleId)) {
+      nextErrors.sampleId = 'Uppercase letters, digits, dash and underscore only.';
+    } else if (sampleId.length > 14) {
+      nextErrors.sampleId = 'Max 14 characters.';
     }
 
-    if (!values.userId.trim()) nextErrors.userId = 'Required.';
+    const userId = values.userId.trim();
+    if (!userId) {
+      nextErrors.userId = 'Required.';
+    } else if (!/^[A-Z0-9\-_]+$/.test(userId)) {
+      nextErrors.userId = 'Uppercase letters, digits, dash and underscore only.';
+    } else if (userId.length > 15) {
+      nextErrors.userId = 'Max 15 characters.';
+    }
+
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -30,11 +52,11 @@ const AddSampleForm = ({ onSubmitSample }) => {
     event.preventDefault();
     if (!validate()) return;
 
-    const success = await onSubmitSample({ 
-      sampleId: values.sampleId.trim(), 
-      userId: values.userId.trim() 
+    const success = await onSubmitSample({
+      sampleId: values.sampleId.trim(),
+      userId: values.userId.trim()
     });
-    
+
     if (success) {
       setValues({ sampleId: '', userId: '' });
     }
@@ -52,7 +74,7 @@ const AddSampleForm = ({ onSubmitSample }) => {
           <input
             type="text"
             value={values.sampleId}
-            onChange={(event) => updateField('sampleId', event.target.value)}
+            onChange={handleSampleIdChange}
             placeholder="Enter sample ID"
             className={`w-full rounded-md border bg-white px-3 py-1.5 text-sm text-industrial-900 outline-none transition focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900 ${errors.sampleId ? 'border-red-500' : 'border-industrial-200'}`}
           />
@@ -64,12 +86,14 @@ const AddSampleForm = ({ onSubmitSample }) => {
           <input
             type="text"
             value={values.userId}
-            onChange={(event) => updateField('userId', event.target.value)}
+            onChange={handleUserIdChange}
             placeholder="Enter user ID"
             className={`w-full rounded-md border bg-white px-3 py-1.5 text-sm text-industrial-900 outline-none transition focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900 ${errors.userId ? 'border-red-500' : 'border-industrial-200'}`}
           />
           {errors.userId && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.userId}</p>}
         </div>
+
+
 
         <div className="sm:col-span-1 pt-5">
           <Button type="submit" label="Submit" icon={Plus} className="w-full h-[34px] text-sm flex items-center justify-center py-0" />
@@ -79,5 +103,7 @@ const AddSampleForm = ({ onSubmitSample }) => {
   );
 };
 
-AddSampleForm.propTypes = { onSubmitSample: PropTypes.func.isRequired };
+AddSampleForm.propTypes = {
+  onSubmitSample: PropTypes.func.isRequired
+};
 export default AddSampleForm;

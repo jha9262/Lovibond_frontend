@@ -7,9 +7,10 @@ import {
     Paper,
     Container
 } from '@mui/material';
-import { Settings as SettingsIcon, Cpu, Sliders, Factory } from 'lucide-react';
+import { Settings as SettingsIcon, Cpu, Sliders, Users } from 'lucide-react';
 import Datalogger from './NewDataLogger';
 import DeviceConfiguration from './DeviceConfiguration';
+import UsersPage from './UsersPage';
 
 const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState(0);
@@ -78,6 +79,11 @@ const SettingsPage = () => {
                             iconPosition="start" 
                             label="DCN DEVICES" 
                         />
+                        <Tab 
+                            icon={<Users size={18} style={{ marginBottom: 4 }} />} 
+                            iconPosition="start" 
+                            label="USER MANAGEMENT" 
+                        />
                     </Tabs>
                 </Container>
             </Box>
@@ -87,6 +93,7 @@ const SettingsPage = () => {
                 <Box sx={{ animate: 'fade-in 0.3s ease-out' }}>
                     {activeTab === 0 && <Datalogger isEmbedded={true} />}
                     {activeTab === 1 && <DeviceConfiguration isEmbedded={true} />}
+                    {activeTab === 2 && <UsersPage />}
                 </Box>
             </Container>
         </Box>

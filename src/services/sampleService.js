@@ -11,13 +11,13 @@ const normaliseSample = (sample) => ({
   sampleId: sample.sampleId ?? sample.SAMPLE_ID ?? '',
   userId: sample.userId ?? sample.USER_ID ?? '',
   userName: sample.userName ?? sample.USER_NAME ?? '',
-  createdDate: sample.createdDate ?? sample.CREATE_DATE_TIME ?? sample.CREATE_DATE ?? '',
+  createdDate: sample.createdDate ?? sample.SAMPLE_DATE_TIME ?? sample.SAMPLE_DATE ?? sample.CREATE_DATE_TIME ?? sample.CREATE_DATE ?? '',
 })
 
 export const sampleService = {
   async getSamples({ page = 1, limit = 10, search = '' } = {}) {
     try {
-      const { data } = await apiClient.get('/samples')
+      const { data } = await apiClient.get('/SAMPLE_CONFIGURATION')
       const rawSamples = data?.SAMPLE_CONFIGURATION?.SAMPLES
         ? Object.values(data.SAMPLE_CONFIGURATION.SAMPLES)
         : Array.isArray(data) ? data : []
@@ -25,10 +25,10 @@ export const sampleService = {
       const searchLower = search.toLowerCase().trim()
       const filtered = searchLower
         ? rawSamples.filter((s) => {
-            const id = String(s.SAMPLE_ID || s.sampleId || '').toLowerCase()
-            const name = String(s.USER_NAME || s.userName || '').toLowerCase()
-            return id.includes(searchLower) || name.includes(searchLower)
-          })
+          const id = String(s.SAMPLE_ID || s.sampleId || '').toLowerCase()
+          const name = String(s.USER_NAME || s.userName || '').toLowerCase()
+          return id.includes(searchLower) || name.includes(searchLower)
+        })
         : rawSamples
 
       const total = filtered.length
@@ -49,14 +49,14 @@ export const sampleService = {
       const samplesObj = samplesList.reduce((acc, p, index) => {
         acc[`S_${index + 1}`] = {
           SAMPLE_ID: p.sampleId,
-          SAMPLE_NAME: p.sampleId,
-          CREATE_DATE_TIME: new Date().toISOString(),
+          SAMPLE_DATE_TIME: p.createdDate,
           USER_ID: p.userId || '',
+          USER_NAME: p.userName || ''
         }
         return acc
       }, {})
 
-      await apiClient.post('/samples', {
+      await apiClient.post('/SAMPLE_CONFIGURATION', {
         SAMPLE_CONFIGURATION: { SAMPLE_AVAILABLE_COUNT: 0, NEW_SAMPLE_ADD_COUNT: samplesList.length, SAMPLES: samplesObj },
       }, { headers: { 'Content-Type': 'application/json' } })
 

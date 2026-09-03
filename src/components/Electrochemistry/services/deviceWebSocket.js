@@ -12,17 +12,13 @@ let _currentSampleId = null
 const notify = (payload) => _listeners.forEach((cb) => cb(payload))
 const setStatus = (status) => { _connectionState = status; _statusListeners.forEach((cb) => cb(status)) }
 
-/**
- * Tells the ESP32 to enable or disable WebSocket streaming.
- * Endpoint: GET /websocket_connection?state=on  OR  ?state=off
- */
 const setEsp32StreamState = async (state) => {
   try {
-    await axios.get(`${API_URL}/websocket_connection`, {
-      params: { state, module: 'electro' },
-      headers: { 'Cache-Control': 'no-store' },
+    const apiState = state === 'on' ? 'CONNECT' : 'DISCONNECT'
+    await axios.get(`${API_URL}/DEVICE_CONNECTION`, {
+      params: { STATE: apiState, module: 1, _t: Date.now() },
     })
-    console.log(`[deviceWebSocket] ESP32 stream state set to: ${state} (module: electro)`)
+    console.log(`[deviceWebSocket] ESP32 stream state set to: ${apiState} (module: 1)`)
   } catch (err) {
     console.warn(`[deviceWebSocket] Could not set stream state to "${state}":`, err.message)
   }
@@ -36,6 +32,13 @@ export const deviceWebSocket = {
    * 2. Opens the WebSocket connection
    */
   async connect(sampleId) {
+    // If already connected to a DIFFERENT sample, disconnect first
+    if (_currentSampleId !== sampleId && (_connectionState === 'CONNECTED' || _connectionState === 'CONNECTING')) {
+      console.log('[deviceWebSocket] Sample changed, reconnecting...')
+      if (_ws) { _ws.close(); _ws = null }
+      setStatus('DISCONNECTED')
+    }
+
     _currentSampleId = sampleId
     if (_connectionState === 'CONNECTED' || _connectionState === 'CONNECTING') return
     setStatus('CONNECTING')

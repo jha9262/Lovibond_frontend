@@ -18,14 +18,13 @@ const Navbar = () => {
   const navItems = [
     { label: 'HOME', to: '/LIVE', icon: <HiOutlineStatusOnline /> },
     { label: 'REPORT', to: '/report', icon: <TbReportSearch /> },
-    { label: 'INVENTORY', to: '/inventory', icon: <Factory size={18} /> },
     { label: 'SETTINGS', to: '/SETTINGS', icon: <Settings size={18} /> },
   ]
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-industrial-200 shadow-industrial-sm">
+    <nav className="sticky top-0 z-50 bg-white border-b border-industrial-200 shadow-sm">
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14">
           <div className="hidden lg:flex items-center space-x-1">
             {navItems.map(({ label, to, icon }) => {
               const isActive = location.pathname === to
@@ -33,10 +32,10 @@ const Navbar = () => {
                 <Link
                   key={label}
                   to={to}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg border-2 transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-all ${
                     isActive
-                      ? 'bg-industrial-900 text-white border-industrial-900'
-                      : 'text-industrial-500 hover:text-industrial-900 hover:bg-industrial-50 border-transparent'
+                      ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                      : 'text-industrial-500 hover:text-brand-700 hover:bg-brand-50'
                   }`}
                 >
                   <span className="text-lg">{icon}</span>
@@ -46,9 +45,9 @@ const Navbar = () => {
             })}
           </div>
 
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-3">
             <div className="flex items-center gap-2 px-3 py-2 bg-industrial-50 border border-industrial-200 rounded-lg">
-              <User size={18} />
+              <User size={16} className="text-brand-600" />
               <div className="flex flex-col">
                 <span className="text-[10px] text-industrial-400 font-bold uppercase tracking-widest leading-none">User</span>
                 <span className="mt-0.5 text-xs text-industrial-900 font-black uppercase">LOVIBOND</span>
@@ -70,8 +69,8 @@ const Navbar = () => {
           <div className="px-4 py-6 space-y-2">
             {navItems.map(({ label, to, icon }) => (
               <Link key={label} to={to} onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl border-2 ${
-                  location.pathname === to ? 'bg-industrial-900 text-white border-industrial-900' : 'text-industrial-500 border-transparent'
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl ${
+                  location.pathname === to ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25' : 'text-industrial-500'
                 }`}
               >
                 <span className="text-xl">{icon}</span>{label}

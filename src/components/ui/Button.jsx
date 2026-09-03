@@ -13,7 +13,7 @@ const Button = ({
     const baseStyles = 'inline-flex items-center justify-center font-semibold transition-all duration-300 rounded-lg shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variants = {
-        primary: 'bg-gray-900 text-white hover:bg-black shadow-industrial-md',
+        primary: 'bg-brand-600 text-white hover:bg-brand-700 shadow-industrial-md',
         secondary: 'bg-white text-industrial-800 border-2 border-industrial-100 hover:bg-industrial-50 hover:border-industrial-200',
         outline: 'bg-transparent text-industrial-600 border border-industrial-200 hover:bg-industrial-50',
         ghost: 'bg-transparent text-industrial-500 hover:bg-industrial-50 shadow-none',

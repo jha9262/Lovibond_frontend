@@ -4,7 +4,7 @@ import { Button } from '../ui';
 import { Plus } from 'lucide-react';
 
 const AddUserForm = ({ onSubmitUser }) => {
-  const [values, setValues] = useState({ userId: '', name: '', designation: '' });
+  const [values, setValues] = useState({ userId: '', name: '', designation: '', password: '' });
   const [errors, setErrors] = useState({});
 
   const updateField = (field, value) => {
@@ -12,20 +12,40 @@ const AddUserForm = ({ onSubmitUser }) => {
     setErrors((current) => ({ ...current, [field]: '' }));
   };
 
+  const handleUserIdChange = (e) => {
+    const val = e.target.value.toUpperCase().replace(/[^A-Z0-9\-,]/g, '');
+    updateField('userId', val.substring(0, 15));
+  };
+
+  const handleNameChange = (e) => {
+    const val = e.target.value.replace(/[^A-Za-z\s]/g, '');
+    updateField('name', val.substring(0, 25));
+  };
+
+  const handleDesignationChange = (e) => {
+    const val = e.target.value.replace(/[^A-Za-z\s]/g, '');
+    updateField('designation', val.substring(0, 25));
+  };
+
+  const handlePasswordChange = (e) => {
+    const val = e.target.value.replace(/[^A-Za-z0-9\-]/g, '');
+    updateField('password', val.substring(0, 16));
+  };
+
   const validate = () => {
     const nextErrors = {};
 
-    const userId = values.userId.trim();
+    const userId = values.userId;
     if (!userId) {
       nextErrors.userId = 'Required.';
     } else if (userId.length > 15) {
       nextErrors.userId = 'Max length is 15 characters.';
-    } else if (!/^[A-Za-z0-9]+$/.test(userId)) {
-      nextErrors.userId = 'Letters and numbers only. No spaces or special characters.';
+    } else if (!/^[A-Z0-9\-,]+$/.test(userId)) {
+      nextErrors.userId = 'Only uppercase letters, numbers, hyphen, and comma allowed.';
     }
 
-    const name = values.name.trim().replace(/\s{2,}/g, ' ');
-    if (!name) {
+    const name = values.name;
+    if (!name.trim()) {
       nextErrors.name = 'Required.';
     } else if (name.length > 25) {
       nextErrors.name = 'Max length is 25 characters.';
@@ -33,13 +53,22 @@ const AddUserForm = ({ onSubmitUser }) => {
       nextErrors.name = 'Letters and spaces only.';
     }
 
-    const designation = values.designation.trim().replace(/\s{2,}/g, ' ');
-    if (!designation) {
+    const designation = values.designation;
+    if (!designation.trim()) {
       nextErrors.designation = 'Required.';
-    } else if (designation.length > 20) {
-      nextErrors.designation = 'Max length is 20 characters.';
-    } else if (!/^[A-Za-z0-9\s]+$/.test(designation)) {
-      nextErrors.designation = 'Text and spaces only.';
+    } else if (designation.length > 25) {
+      nextErrors.designation = 'Max length is 25 characters.';
+    } else if (!/^[A-Za-z\s]+$/.test(designation)) {
+      nextErrors.designation = 'Letters and spaces only.';
+    }
+
+    const password = values.password;
+    if (!password) {
+      nextErrors.password = 'Required.';
+    } else if (password.length > 16) {
+      nextErrors.password = 'Max 16 characters.';
+    } else if (!/^[A-Za-z0-9\-]+$/.test(password)) {
+      nextErrors.password = 'Letters, numbers, and hyphen only.';
     }
 
     setErrors(nextErrors);
@@ -51,13 +80,14 @@ const AddUserForm = ({ onSubmitUser }) => {
     if (!validate()) return;
 
     const success = await onSubmitUser({ 
-      userId: values.userId.trim(), 
+      userId: values.userId, 
       name: values.name.trim().replace(/\s{2,}/g, ' '), 
-      designation: values.designation.trim().replace(/\s{2,}/g, ' ') 
+      designation: values.designation.trim().replace(/\s{2,}/g, ' '),
+      password: values.password
     });
     
     if (success) {
-      setValues({ userId: '', name: '', designation: '' });
+      setValues({ userId: '', name: '', designation: '', password: '' });
     }
   };
 
@@ -67,13 +97,13 @@ const AddUserForm = ({ onSubmitUser }) => {
         <h2 className="text-base font-bold text-industrial-900">Add User</h2>
       </div>
 
-      <form onSubmit={submit} className="grid gap-4 p-4 sm:grid-cols-4 sm:items-start sm:p-4">
+      <form onSubmit={submit} className="grid gap-4 p-4 sm:grid-cols-5 sm:items-start sm:p-4">
         <div className="sm:col-span-1">
           <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-industrial-500">User ID</label>
           <input
             type="text"
             value={values.userId}
-            onChange={(event) => updateField('userId', event.target.value)}
+            onChange={handleUserIdChange}
             placeholder="Enter user ID"
             className={`w-full rounded-md border bg-white px-3 py-1.5 text-sm text-industrial-900 outline-none transition focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900 ${errors.userId ? 'border-red-500' : 'border-industrial-200'}`}
           />
@@ -81,11 +111,11 @@ const AddUserForm = ({ onSubmitUser }) => {
         </div>
 
         <div className="sm:col-span-1">
-          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-industrial-500">Full Name</label>
+          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-industrial-500">User Name</label>
           <input
             type="text"
             value={values.name}
-            onChange={(event) => updateField('name', event.target.value)}
+            onChange={handleNameChange}
             placeholder="Enter user name"
             className={`w-full rounded-md border bg-white px-3 py-1.5 text-sm text-industrial-900 outline-none transition focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900 ${errors.name ? 'border-red-500' : 'border-industrial-200'}`}
           />
@@ -97,11 +127,23 @@ const AddUserForm = ({ onSubmitUser }) => {
           <input
             type="text"
             value={values.designation}
-            onChange={(event) => updateField('designation', event.target.value)}
+            onChange={handleDesignationChange}
             placeholder="Enter designation"
             className={`w-full rounded-md border bg-white px-3 py-1.5 text-sm text-industrial-900 outline-none transition focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900 ${errors.designation ? 'border-red-500' : 'border-industrial-200'}`}
           />
           {errors.designation && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.designation}</p>}
+        </div>
+
+        <div className="sm:col-span-1">
+          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-industrial-500">Password</label>
+          <input
+            type="password"
+            value={values.password}
+            onChange={handlePasswordChange}
+            placeholder="Enter password"
+            className={`w-full rounded-md border bg-white px-3 py-1.5 text-sm text-industrial-900 outline-none transition focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900 ${errors.password ? 'border-red-500' : 'border-industrial-200'}`}
+          />
+          {errors.password && <p className="mt-1 text-[11px] font-medium text-red-500">{errors.password}</p>}
         </div>
 
         <div className="sm:col-span-1 pt-5">

@@ -1,45 +1,85 @@
-let mockUsers = [
-  { userId: 'USR001', name: 'John Doe', designation: 'Senior Engineer', createdDate: new Date().toISOString() },
-  { userId: 'USR002', name: 'Jane Smith', designation: 'Lab Technician', createdDate: new Date(Date.now() - 86400000).toISOString() },
-];
+import api from './api';
+
+const normaliseUser = (user, key) => ({
+  userId: user.USER_ID?.toString() || key.replace('U_', ''),
+  name: user.USER_NAME || '',
+  designation: user.USER_DESIGNATION || '',
+  createdDate: user.CREATE_DATE_TIME || '',
+});
 
 export const userService = {
   async getUsers({ page = 1, limit = 10, search = '' }) {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    
-    let filtered = [...mockUsers];
-    if (search) {
-      const q = search.toLowerCase();
-      filtered = filtered.filter(u => 
-        u.userId.toLowerCase().includes(q) || 
-        u.name.toLowerCase().includes(q)
-      );
+    try {
+      const { data } = await api.get('/USER_CONFIGURATION');
+      const rawUsers = data?.USER_CONFIGURATION?.USERS 
+        ? Object.entries(data.USER_CONFIGURATION.USERS).map(([k, v]) => normaliseUser(v, k))
+        : [];
+
+      let filtered = rawUsers;
+      if (search) {
+        const q = search.toLowerCase();
+        filtered = filtered.filter(u => 
+          u.userId.toLowerCase().includes(q) || 
+          u.name.toLowerCase().includes(q)
+        );
+      }
+      
+      const total = filtered.length;
+      const totalPages = Math.ceil(total / limit) || 1;
+      const start = (page - 1) * limit;
+      const users = filtered.slice(start, start + limit);
+      
+      return { users, pagination: { page, limit, total, totalPages } };
+    } catch (error) {
+      console.error('[userService] Failed to fetch users:', error);
+      throw new Error('Unable to retrieve user data from device.');
     }
-    
-    const total = filtered.length;
-    const totalPages = Math.ceil(total / limit) || 1;
-    const start = (page - 1) * limit;
-    const users = filtered.slice(start, start + limit);
-    
-    return { users, pagination: { page, limit, total, totalPages } };
   },
 
   async createUsers(payloads) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const created = [];
-    const failed = [];
+    try {
+      const usersObj = payloads.reduce((acc, p, index) => {
+        acc[`U_${index + 1}`] = {
+          USER_ID: p.userId,
+          USER_NAME: p.name || '',
+          USER_PASSWORD: p.password || '',
+          USER_DESIGNATION: p.designation || ''
+        };
+        return acc;
+      }, {});
 
-    for (const payload of payloads) {
-      const exists = mockUsers.some(u => u.userId === payload.userId);
-      if (exists) {
-        failed.push(payload);
-      } else {
-        const newUser = { ...payload, createdDate: new Date().toISOString() };
-        mockUsers = [newUser, ...mockUsers];
-        created.push(newUser);
-      }
+      await api.post('/USER_CONFIGURATION', {
+        USER_CONFIGURATION: { USERS: usersObj }
+      });
+
+      return { 
+        created: payloads.map(p => ({
+          ...p,
+          createdDate: new Date().toISOString()
+        })), 
+        failed: [] 
+      };
+    } catch (error) {
+      console.error('[userService] Failed to bulk create users:', error);
+      throw new Error('Unable to save users to the device.');
     }
-    
-    return { created, failed };
+  },
+
+  async deleteUser(userId) {
+    try {
+      await api.post('/USER_CONFIGURATION', {
+        USER_CONFIGURATION: {
+          USERS: {
+            "U_1": {
+              USER_ID: userId
+            }
+          }
+        }
+      });
+      return true;
+    } catch (error) {
+      console.error('[userService] Failed to delete user:', error);
+      throw new Error('Unable to delete user from the device.');
+    }
   }
 };

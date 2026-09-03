@@ -3,12 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import DashboardOverview from '../components/Home/DashboardOverview'
 import HomeSidebar from '../components/Home/HomeSidebar'
 import SampleManagement from '../components/Home/SampleManagement'
-import UserManagement from '../components/Home/UserManagement'
 import ElectrochemistryPage from '../components/Electrochemistry/ElectrochemistryPage'
 import PhotometryPage from '../components/Photometry/PhotometryPage'
 import { sampleService } from '../services/sampleService'
-import { userService } from '../services/userService'
-
 
 const Live = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -19,12 +16,6 @@ const Live = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const requestRef = useRef({ page: 1, limit: 10, search: '' })
-
-  const [users, setUsers] = useState([])
-  const [userPagination, setUserPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 })
-  const [loadingUsers, setLoadingUsers] = useState(true)
-  const [userError, setUserError] = useState(false)
-  const userRequestRef = useRef({ page: 1, limit: 10, search: '' })
 
 
   const loadSamples = useCallback(async (params = {}) => {
@@ -44,28 +35,10 @@ const Live = () => {
     }
   }, [])
 
-  const loadUsers = useCallback(async (params = {}) => {
-    const request = { ...userRequestRef.current, ...params }
-    userRequestRef.current = request
-    try {
-      setLoadingUsers(true)
-      setUserError(false)
-      const result = await userService.getUsers(request)
-      setUsers(result.users)
-      setUserPagination(result.pagination)
-    } catch (err) {
-      console.error('Unable to load users:', err)
-      setUserError(true)
-    } finally {
-      setLoadingUsers(false)
-    }
-  }, [])
-
 
   useEffect(() => {
     loadSamples()
-    loadUsers()
-  }, [loadSamples, loadUsers])
+  }, [loadSamples])
 
   const selectSection = (section) => { setActiveSection(section); setIsMobileMenuOpen(false) }
 
@@ -76,17 +49,8 @@ const Live = () => {
     return { createdCount: response.created.length, failedCount: response.failed.length, failedPayloads: response.failed }
   }
 
-  const createUser = async (payloads) => {
-    const requests = Array.isArray(payloads) ? payloads : [payloads]
-    const response = await userService.createUsers(requests)
-    await loadUsers({ page: 1 })
-    return { createdCount: response.created.length, failedCount: response.failed.length, failedPayloads: response.failed }
-  }
-
   const renderSection = () => {
     switch (activeSection) {
-      case 'users':
-        return <UserManagement users={users} pagination={userPagination} loading={loadingUsers} error={userError} onRequestUsers={loadUsers} onCreateUser={createUser} />
       case 'samples':
         return <SampleManagement samples={samples} pagination={pagination} loading={loading} error={error} onRequestSamples={loadSamples} onCreateSample={createSample} />
       case 'electrochemistry':
@@ -94,7 +58,7 @@ const Live = () => {
       case 'photometry':
         return <PhotometryPage samples={samples} />
       default:
-        return <DashboardOverview samples={samples} totalCount={pagination.total} loading={loading} error={error} onViewSamples={() => selectSection('samples')} />
+        return <DashboardOverview samples={samples} totalCount={pagination.total} loading={loading} error={error} onViewSamples={() => selectSection('samples')} onRetry={loadSamples} />
     }
   }
 

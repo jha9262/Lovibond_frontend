@@ -36,22 +36,9 @@ export const useElectrochemistryWebSocket = (sampleId) => {
     }
   }, [])
 
-  // Auto-connect when sample changes
+  // Clear live data when sample changes so stale data is not shown
   useEffect(() => {
     setLiveData(null)
-    
-    if (!sampleId) {
-      if (deviceWebSocket.getStatus() === 'CONNECTED' || deviceWebSocket.getStatus() === 'CONNECTING') {
-        deviceWebSocket.disconnect()
-      }
-      return
-    }
-
-    setIsConnecting(true)
-    deviceWebSocket.connect(sampleId).catch((err) => {
-      console.error('WebSocket auto-connect failed:', err)
-      if (isMountedRef.current) setIsConnecting(false)
-    })
   }, [sampleId])
 
   // Allow setting initial data before websocket frames arrive
@@ -59,5 +46,21 @@ export const useElectrochemistryWebSocket = (sampleId) => {
     if (isMountedRef.current) setLiveData(data)
   }
 
-  return { connectionStatus, liveData, isConnecting, setInitialData }
+  const connect = async () => {
+    if (!sampleId) return
+    setIsConnecting(true)
+    try {
+      await deviceWebSocket.connect(sampleId)
+    } catch (err) {
+      console.error('WebSocket connect failed:', err)
+      if (isMountedRef.current) setIsConnecting(false)
+      throw err
+    }
+  }
+
+  const disconnect = async () => {
+    await deviceWebSocket.disconnect()
+  }
+
+  return { connectionStatus, liveData, isConnecting, setInitialData, connect, disconnect }
 }

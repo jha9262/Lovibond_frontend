@@ -12,7 +12,21 @@ const deviceService = axios.create({
 deviceService.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    const message = error.response?.data?.message || error.message || 'Network Error';
+    let message = error.message || 'Network Error';
+    if (error.response?.data) {
+      if (typeof error.response.data === 'string') {
+        try {
+          const parsed = JSON.parse(error.response.data);
+          message = parsed.MESSAGE || parsed.message || error.response.data;
+        } catch {
+          message = error.response.data;
+        }
+      } else if (error.response.data.message) {
+        message = error.response.data.message;
+      } else if (error.response.data.MESSAGE) {
+        message = error.response.data.MESSAGE;
+      }
+    }
     console.error('API Error:', message);
     return Promise.reject(message);
   }

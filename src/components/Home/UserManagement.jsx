@@ -27,32 +27,29 @@ const UserDirectory = ({ users, pagination, loading, error, onRequest }) => {
   const changeSearch = (value) => { setQuery(value); onRequest({ page: 1, limit: pagination.limit, search: value }); };
 
   return (
-    <section className="overflow-hidden rounded-lg border border-industrial-200 bg-white shadow-sm flex flex-col">
+    <section className="overflow-hidden rounded-xl border border-industrial-200 bg-white shadow-sm flex flex-col">
       <div className="flex flex-col gap-3 border-b border-industrial-100 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base font-bold text-industrial-900">User Directory</h2>
-          <p className="mt-0.5 text-xs text-industrial-500">Manage and view all registered users</p>
+          <h2 className="text-base font-bold text-industrial-900">Directory</h2>
         </div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-          <label className="relative block sm:w-64">
+          <label className="relative block sm:w-56">
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-industrial-400" size={15} />
             <input 
               value={query} 
               onChange={(event) => changeSearch(event.target.value)} 
               placeholder="Search users..." 
-              className="w-full rounded-md border border-industrial-200 py-1.5 pl-9 pr-3 text-sm text-industrial-900 outline-none transition focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900" 
+              className="w-full rounded-lg border border-industrial-200 py-2 pl-9 pr-3 text-sm text-industrial-900 outline-none transition placeholder:text-industrial-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20" 
             />
           </label>
-          <label className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-industrial-600">
-            Show:
+          <label className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-industrial-500">
             <select 
               value={pagination.limit} 
               onChange={(event) => request({ page: 1, limit: Number(event.target.value) })} 
-              className="rounded-md border border-industrial-200 bg-white px-2 py-1 text-sm font-semibold text-industrial-800 outline-none focus:border-industrial-900 focus:ring-1 focus:ring-industrial-900"
+              className="rounded-lg border border-industrial-200 bg-white px-2.5 py-2 text-sm font-semibold text-industrial-800 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             >
-              {PAGE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+              {PAGE_OPTIONS.map((option) => <option key={option} value={option}>{option} / page</option>)}
             </select>
-            per page
           </label>
         </div>
       </div>
@@ -69,30 +66,30 @@ const UserDirectory = ({ users, pagination, loading, error, onRequest }) => {
             <table className="w-full min-w-[640px] text-left">
               <thead className="bg-industrial-50 text-[10px] font-bold uppercase tracking-wider text-industrial-500">
                 <tr>
-                  <th className="px-4 py-2.5 w-16">No</th>
-                  <th className="px-4 py-2.5">User ID</th>
-                  <th className="px-4 py-2.5">Name</th>
-                  <th className="px-4 py-2.5">Designation</th>
-                  <th className="px-4 py-2.5">Created Date</th>
-                  <th className="px-4 py-2.5 text-right">Action</th>
+                  <th className="px-4 py-3 w-16">No</th>
+                  <th className="px-4 py-3">User ID</th>
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Designation</th>
+                  <th className="px-4 py-3">Created Date</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-industrial-100">
                 {users.map((user, index) => (
-                  <tr key={user.userId} className="text-sm text-industrial-700 hover:bg-industrial-50/70 transition-colors">
-                    <td className="whitespace-nowrap px-4 py-2.5 font-medium text-industrial-500">
+                  <tr key={user.userId} className="text-sm text-industrial-700 hover:bg-brand-50/40 transition-colors">
+                    <td className="whitespace-nowrap px-4 py-3 font-medium text-industrial-500">
                       {(pagination.page - 1) * pagination.limit + index + 1}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2.5 font-bold text-industrial-900">{user.userId}</td>
-                    <td className="px-4 py-2.5 font-medium text-industrial-800">{user.name || '—'}</td>
-                    <td className="px-4 py-2.5">{user.designation || '—'}</td>
-                    <td className="whitespace-nowrap px-4 py-2.5 text-industrial-600">{formatDate(user.createdDate)}</td>
-                    <td className="px-4 py-2.5 text-right">
+                    <td className="whitespace-nowrap px-4 py-3 font-bold text-industrial-900">{user.userId}</td>
+                    <td className="px-4 py-3 font-medium text-industrial-800">{user.name || '—'}</td>
+                    <td className="px-4 py-3 text-industrial-600">{user.designation || '—'}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-industrial-500">{formatDate(user.createdDate)}</td>
+                    <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-1.5">
-                        <button disabled className="rounded border border-industrial-200 bg-white p-1.5 text-industrial-400 opacity-50 cursor-not-allowed">
+                        <button disabled className="rounded-md border border-industrial-200 bg-white p-1.5 text-industrial-400 opacity-50 cursor-not-allowed hover:bg-industrial-50">
                           <Edit2 size={13} />
                         </button>
-                        <button disabled className="rounded border border-industrial-200 bg-white p-1.5 text-industrial-400 opacity-50 cursor-not-allowed">
+                        <button disabled className="rounded-md border border-industrial-200 bg-white p-1.5 text-industrial-400 opacity-50 cursor-not-allowed hover:bg-industrial-50">
                           <Trash2 size={13} />
                         </button>
                       </div>
@@ -104,20 +101,11 @@ const UserDirectory = ({ users, pagination, loading, error, onRequest }) => {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-industrial-100 px-4 py-3 bg-white">
             <p className="text-xs text-industrial-500">
-              Showing <span className="font-semibold text-industrial-800">{(pagination.page - 1) * pagination.limit + 1}</span> to <span className="font-semibold text-industrial-800">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-semibold text-industrial-800">{pagination.total}</span> entries
+              Showing <span className="font-semibold text-brand-700">{(pagination.page - 1) * pagination.limit + 1}</span> to <span className="font-semibold text-brand-700">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-semibold text-brand-700">{pagination.total}</span> entries
             </p>
             <nav className="flex items-center gap-1" aria-label="Pagination">
-              <button aria-label="Previous page" disabled={pagination.page === 1} onClick={() => request({ page: pagination.page - 1 })} className="rounded-md border border-industrial-200 bg-white px-2.5 py-1 text-xs font-semibold text-industrial-600 hover:bg-industrial-50 transition-colors disabled:cursor-not-allowed disabled:opacity-40">Prev</button>
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => request({ page: p })}
-                  className={`min-w-[28px] rounded-md border px-2 py-1 text-center text-xs font-semibold transition-colors ${pagination.page === p ? 'border-industrial-900 bg-industrial-900 text-white' : 'border-industrial-200 bg-white text-industrial-600 hover:bg-industrial-50'}`}
-                >
-                  {p}
-                </button>
-              ))}
-              <button aria-label="Next page" disabled={pagination.page === pagination.totalPages} onClick={() => request({ page: pagination.page + 1 })} className="rounded-md border border-industrial-200 bg-white px-2.5 py-1 text-xs font-semibold text-industrial-600 hover:bg-industrial-50 transition-colors disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+              <button aria-label="Previous page" disabled={pagination.page === 1} onClick={() => request({ page: pagination.page - 1 })} className="rounded-lg border border-industrial-200 bg-white px-3 py-1.5 text-xs font-semibold text-industrial-600 hover:bg-industrial-50 transition-colors disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+              <button aria-label="Next page" disabled={pagination.page === pagination.totalPages} onClick={() => request({ page: pagination.page + 1 })} className="rounded-lg border border-industrial-200 bg-white px-3 py-1.5 text-xs font-semibold text-industrial-600 hover:bg-industrial-50 transition-colors disabled:cursor-not-allowed disabled:opacity-40">Next</button>
             </nav>
           </div>
         </>
@@ -149,10 +137,9 @@ const UserManagement = ({ users, pagination, loading, error, onRequestUsers, onC
   };
 
   return (
-    <div className="w-full space-y-5">
+    <div className="w-full space-y-6">
       <header>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-industrial-500">Home / Users</p>
-        <h1 className="mt-1.5 text-2xl font-black tracking-tight text-industrial-900 sm:text-3xl">Users</h1>
+        <h1 className="text-2xl font-black tracking-tight text-industrial-900 sm:text-3xl uppercase">Users</h1>
         <p className="mt-1 text-sm text-industrial-500">Create and manage system users</p>
       </header>
 

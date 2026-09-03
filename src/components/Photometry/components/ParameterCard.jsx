@@ -8,15 +8,17 @@ const STATUS_STYLES = {
 };
 
 const formatTime = (ts) => {
-  if (!ts) return '--';
-  let d;
+  if (!ts || ts === '00:00:00') return '--';
+  if (typeof ts === 'string' && ts.includes('-')) {
+    return ts;
+  }
+  // Fallback: Unix timestamp
   if (!isNaN(Number(ts)) && String(ts).trim() !== '') {
     const n = Number(ts);
-    d = new Date(n < 100000000000 ? n * 1000 : n);
-  } else {
-    d = new Date(ts);
+    const d = new Date(n < 100000000000 ? n * 1000 : n);
+    return Number.isNaN(d.getTime()) ? ts : d.toLocaleTimeString();
   }
-  return Number.isNaN(d.getTime()) ? ts : new Intl.DateTimeFormat(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d);
+  return ts;
 };
 
 const ParameterCard = ({ parmName, parmValue, tempValue, createDateTime, status }) => {
@@ -51,8 +53,8 @@ const ParameterCard = ({ parmName, parmValue, tempValue, createDateTime, status 
           </div>
         </div>
         <div className="mt-4 flex items-center gap-1.5 border-t border-industrial-50 pt-3">
-          <Clock size={11} className="text-industrial-400" />
-          <p className="text-[10px] font-medium text-industrial-400">{formatTime(createDateTime)}</p>
+          <Clock size={11} className="text-industrial-600" />
+          <p className="text-[10px] font-semibold text-industrial-600">{formatTime(createDateTime)}</p>
         </div>
       </div>
     </div>
